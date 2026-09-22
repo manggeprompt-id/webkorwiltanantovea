@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMPEKA CMS - Portal Pendidikan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; overflow-x: hidden; }
+        
+        #public-view { display: block; }
+        #login-view { display: none; height: 100vh; align-items: center; justify-content: center; background: #3c8dbc; }
+        #admin-view { display: none; }
+        
+        .carousel-item img { height: 60vh; object-fit: cover; filter: brightness(50%); }
+        .carousel-caption { bottom: 20%; z-index: 10; }
+        .carousel-caption h1 { font-weight: 800; font-size: 3rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+        
+        .stat-box { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid #3c8dbc; transition: transform 0.3s; }
+        .stat-box:hover { transform: translateY(-5px); }
+        .stat-box h2 { color: #3c8dbc; font-weight: bold; font-size: 2.5rem; margin: 10px 0; }
+        .section-title { position: relative; margin-bottom: 40px; font-weight: 700; color: #2c3e50; text-align: center; text-transform: uppercase; }
+        .section-title::after { content: ""; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 60px; height: 3px; background-color: #f39c12; }
+        
+        .news-scroll-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 20px; padding-bottom: 15px; }
+        .news-scroll-container::-webkit-scrollbar { height: 8px; }
+        .news-scroll-container::-webkit-scrollbar-thumb { background: #3c8dbc; border-radius: 4px; }
+        .news-card { flex: 0 0 320px; scroll-snap-align: start; }
+        .news-card img { height: 180px; object-fit: cover; }
+        
+        .login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); width: 100%; max-width: 400px; }
+        #sidebar { min-width: 250px; max-width: 250px; min-height: 100vh; background-color: #222d32; color: #b8c7ce; transition: all 0.3s; }
+        #sidebar .sidebar-heading { background: #1a2226; color: #fff; padding: 15px; font-size: 1.1rem; }
+        #sidebar a { padding: 12px 15px; font-size: 14px; display: block; color: #b8c7ce; text-decoration: none; border-left: 3px solid transparent; cursor: pointer; }
+        #sidebar a:hover, #sidebar a.active { color: #fff; background: #1e282c; border-left-color: #3c8dbc; }
+        .topbar { background: #3c8dbc; padding: 10px 20px; color: white; display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        #content { width: 100%; transition: all 0.3s; display: flex; flex-direction: column; min-height: 100vh;}
+        .page-section { display: none; } .page-section.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .wa-float { position: fixed; bottom: 30px; right: 30px; background-color: #25d366; color: white; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 35px; box-shadow: 2px 2px 10px rgba(0,0,0,0.3); z-index: 1000; transition: transform 0.3s; text-decoration: none; }
+        .wa-float:hover { transform: scale(1.1); color: white; }
+    </style>
+</head>
+<body>
+
+<script>
+    // ========================================================
+    // MASUKKAN URL DEPLOY WEB APP BAPAK DI SINI:
+    // ========================================================
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzho3cE9xuyn6bKEwIjv4t620ZeS0sAYUNTWUyQ-xifJmFQ8a02k9-kmGSTkKrGBcnJ/exec"; 
+</script>
+
+<!-- VIEW 1: HALAMAN PUBLIK -->
+<div id="public-view">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color: #222d32;">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#"><i class="fas fa-graduation-cap text-warning me-2"></i> PORTAL PENDIDIKAN TANANTOVEA</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#beranda">Beranda</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#statistik">Statistik</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#berita">Berita</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#galeri">Galeri</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#dokumen">Unduhan</a></li>
+                    <li class="nav-item ms-lg-3"><button class="btn btn-warning btn-sm mt-1 fw-bold" onclick="switchView('login')"><i class="fas fa-sign-in-alt"></i> Login Admin</button></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section id="beranda">
+        <div id="headerCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+            <div class="carousel-inner" id="public-header-container">
+                <div class="carousel-item active">
+                    <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2070" class="d-block w-100" alt="Sekolah">
+                    <div class="carousel-caption">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Logo_Pendidikan_Nasional.svg/1200px-Logo_Pendidikan_Nasional.svg.png" width="90" class="mb-4" alt="Logo">
+                        <h1>SISTEM INFORMASI MONITORING PENDIDIKAN</h1>
+                        <p class="fs-5">Pusat Informasi, Monitoring, Supervisi, dan Evaluasi Pendidikan Kecamatan Tanantovea.</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#headerCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+            <button class="carousel-control-next" type="button" data-bs-target="#headerCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+        </div>
+    </section>
+
+    <!-- STATISTIK & GRAFIK PINDAH KE HALAMAN PUBLIK -->
+    <section id="statistik" class="container" style="margin-top: -60px; position: relative; z-index: 10;">
+        <div class="row g-4 justify-content-center" id="public-stats-container">
+            <div class="col-12 text-center mt-4"><div class="spinner-border text-primary"></div></div>
+        </div>
+        
+        <!-- Wadah Grafik -->
+        <div class="row mt-5" id="public-charts-container" style="display: none;">
+            <div class="col-md-4 mb-3">
+                <div class="bg-white p-4 rounded shadow-sm border h-100">
+                    <h6 class="border-bottom pb-2 mb-4 text-secondary text-center fw-bold">Grafik Akreditasi Sekolah</h6>
+                    <canvas id="chartAkreditasi" style="max-height: 250px;"></canvas>
+                </div>
+            </div>
+            <div class="col-md-8 mb-3">
+                <div class="bg-white p-4 rounded shadow-sm border h-100">
+                    <h6 class="border-bottom pb-2 mb-4 text-secondary text-center fw-bold">Grafik Realisasi ARKAS Sekolah</h6>
+                    <canvas id="chartArkas" style="max-height: 250px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="berita" class="container" style="margin-top: 80px;">
+        <div class="row">
+            <div class="col-lg-8">
+                <h3 class="section-title text-start">Berita & Kegiatan</h3>
+                <div class="news-scroll-container" id="public-news-container"><div class="text-center text-muted py-5 w-100">Memuat...</div></div>
+            </div>
+            <div class="col-lg-4 mt-5 mt-lg-0">
+                <div class="card mb-4 border-warning">
+                    <div class="card-header bg-warning text-dark fw-bold"><i class="fas fa-calendar-alt"></i> Agenda Kepengawasan</div>
+                    <ul class="list-group list-group-flush" id="public-agenda-container"><li class="list-group-item text-center">Memuat...</li></ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="galeri" class="container" style="margin-top: 80px;"><h3 class="section-title">Galeri Video</h3><div class="row g-4" id="public-video-container"></div></section>
+    <section id="dokumen" class="container" style="margin-top: 80px; margin-bottom: 80px;"><h3 class="section-title">Pusat Unduhan</h3><div class="card"><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0"><thead class="table-light"><tr><th>Kategori</th><th>Nama Dokumen</th><th class="text-end">Aksi</th></tr></thead><tbody id="public-dokumen-container"></tbody></table></div></div></div></section>
+    <footer style="background: #222d32; color: #b8c7ce; padding: 30px 0;"><div class="container text-center"><p class="small mb-0">&copy; 2026 Portal Pendidikan Kecamatan Tanantovea.</p></div></footer>
+    <a href="#" id="btnWaFloat" target="_blank" class="wa-float d-none"><i class="fab fa-whatsapp"></i></a>
+</div>
+
+<!-- VIEW 2: LOGIN ADMIN -->
+<div id="login-view">
+    <div class="login-box text-center position-relative">
+        <button class="btn btn-sm btn-outline-secondary position-absolute top-0 start-0 m-3" onclick="switchView('public')"><i class="fas fa-arrow-left"></i></button>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Logo_Pendidikan_Nasional.svg/1200px-Logo_Pendidikan_Nasional.svg.png" width="60" class="mb-3 mt-4">
+        <h4 class="mb-4">SIMPEKA CMS<br><small class="text-muted fs-6">Login Administrator</small></h4>
+        <form id="formLogin"><div class="mb-3"><input type="text" id="username" class="form-control" placeholder="Username" required></div><div class="mb-3"><input type="password" id="password" class="form-control" placeholder="Password" required></div><button type="submit" class="btn btn-primary w-100" id="btnLogin">Masuk</button></form>
+    </div>
+</div>
+
+<!-- VIEW 3: DASHBOARD ADMIN -->
+<div id="admin-view">
+    <div class="d-flex">
+        <nav id="sidebar">
+            <div class="sidebar-heading text-center fw-bold border-bottom border-secondary">PORTAL PENGAWAS</div>
+            <div class="py-2" style="max-height: 90vh; overflow-y: auto;">
+                <a onclick="showPage('sekolah', this)" class="menu-link active"><i class="fas fa-school"></i> Profil Sekolah</a>
+                <a onclick="showPage('rapor', this)" class="menu-link"><i class="fas fa-chart-pie"></i> Rapor Pendidikan</a>
+                <a onclick="showPage('rkjm', this)" class="menu-link"><i class="fas fa-clipboard-list"></i> RKJM</a>
+                <a onclick="showPage('rkt', this)" class="menu-link"><i class="fas fa-calendar-check"></i> RKT</a>
+                <a onclick="showPage('arkas', this)" class="menu-link"><i class="fas fa-money-check-alt"></i> ARKAS</a>
+                <a onclick="showPage('supervisi', this)" class="menu-link"><i class="fas fa-search"></i> Supervisi</a>
+                <a onclick="showPage('tanya-gtk', this)" class="menu-link"><i class="fas fa-comments"></i> Tanya GTK</a>
+                <a onclick="showPage('berita', this)" class="menu-link"><i class="fas fa-newspaper"></i> Berita Kegiatan</a>
+                <a onclick="showPage('video', this)" class="menu-link"><i class="fas fa-video"></i> Video YouTube</a>
+                <a onclick="showPage('agenda', this)" class="menu-link"><i class="fas fa-calendar-alt"></i> Agenda Kegiatan</a>
+                <a onclick="showPage('dokumen', this)" class="menu-link"><i class="fas fa-folder-open"></i> Pusat Dokumen</a>
+                <hr class="border-secondary">
+                <a onclick="showPage('header-web', this)" class="menu-link"><i class="fas fa-images"></i> Header Web</a>
+                <a onclick="showPage('pengaturan', this)" class="menu-link"><i class="fas fa-cog"></i> Pengaturan Web</a>
+                <a onclick="switchView('public')" class="menu-link text-warning"><i class="fas fa-globe"></i> Lihat Web Publik</a>
+            </div>
+        </nav>
+
+        <div id="content">
+            <div class="topbar">
+                <div><button class="btn btn-outline-light btn-sm me-2" id="sidebarToggle"><i class="fas fa-bars"></i></button><span class="fw-bold fs-6 d-none d-md-inline">SISTEM INFORMASI MONITORING</span></div>
+                <div><span class="me-3" id="userNameDisplay"><i class="fas fa-user-circle"></i> Admin</span><button class="btn btn-danger btn-sm" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
+            </div>
+
+            <!-- Dashboard/Statistik telah dihapus dari sini -->
+            <div class="container-fluid p-4 flex-grow-1" style="max-height: 90vh; overflow-y: auto;">
+                <div id="page-sekolah" class="page-section active"><div class="d-flex justify-content-between mb-3"><h4 class="text-secondary">Sekolah Binaan</h4><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddSekolah"><i class="fas fa-plus"></i></button></div><div class="table-responsive"><table class="table table-striped"><thead class="table-dark"><tr><th>NPSN</th><th>Sekolah</th><th>Kepsek</th><th>Guru</th><th>Siswa</th><th>Akreditasi</th></tr></thead><tbody id="table-sekolah-body"></tbody></table></div></div>
+                <div id="page-rapor" class="page-section"><div class="d-flex justify-content-between mb-3"><h4 class="text-secondary">Rapor Pendidikan</h4><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddRapor" onclick="populateDropdown('.select-sekolah')"><i class="fas fa-plus"></i></button></div><div class="table-responsive"><table class="table table-striped"><thead class="table-dark"><tr><th>Sekolah</th><th>Tahun</th><th>Lit</th><th>Num</th><th>Kar</th></tr></thead><tbody id="table-rapor-body"></tbody></table></div></div>
+                <div id="page-rkjm" class="page-section"><div class="d-flex justify-content-between mb-3"><h4 class="text-secondary">RKJM</h4><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddRKJM" onclick="populateDropdown('.select-sekolah')"><i class="fas fa-plus"></i></button></div><div class="table-responsive"><table class="table table-striped"><thead class="table-dark"><tr><th>Sekolah</th><th>Periode</th><th>Program</th><th>Status</th></tr></thead><tbody id="table-rkjm-body"></tbody></table></div></div>
+                <div id="page-rkt" class="page-section"><div class="d-flex justify-content-between mb-3"><h4 class="text-secondary">RKT</h4><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddRKT" onclick="populateDropdown('.select-sekolah')"><i class="fas fa-plus"></i></button></div><div class="table-responsive"><table class="table table-striped"><thead class="table-dark"><tr><th>Sekolah</th><th>Tahun</th><th>Kegiatan</th><th>Anggaran</th></tr></thead><tbody id="table-rkt-body"></tbody></table></div></div>
+                <div id="page-arkas" class="page-section"><div class="d-flex justify-content-between mb-3"><h4 class="text-secondary">ARKAS</h4><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddARKAS" onclick="populateDropdown('.select-sekolah')"><i class="fas fa-plus"></i></button></div><div class="table-responsive"><table class="table table-striped"><thead class="table-dark"><tr><th>Sekolah</th><th>Thn</th><th>Sumber</th><th>Pagu</th><th>Realisasi</th><th>%</th></tr></thead><tbody id="table-arkas-body"></tbody></table></div></div>
+                <div id="page-supervisi" class="page-section"><div class="d-flex justify-content-between mb-3"><h4 class="text-secondary">Supervisi</h4><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddSupervisi" onclick="populateDropdown('.select-sekolah')"><i class="fas fa-plus"></i></button></div><div class="table-responsive"><table class="table table-striped"><thead class="table-dark"><tr><th>Tanggal</th><th>Sekolah</th><th>Jenis</th><th>Hasil</th></tr></thead><tbody id="table-supervisi-body"></tbody></table></div></div>
+                <div id="page-tanya-gtk" class="page-section"><div class="d-flex justify-content-between mb-3"><h4 class="text-secondary">Ruang Tanya GTK</h4><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddTanya" onclick="populateDropdown('.select-sekolah')"><i class="fas fa-plus"></i> Input</button></div><div class="table-responsive"><table class="table table-striped"><thead class="table-dark"><tr><th>Tanggal</th><th>Nama / NPSN</th><th>Kategori</th><th>Pertanyaan</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="table-tanya-body"></tbody></table></div></div>
+                <div id="page-berita" class="page-section"><div class="d-flex justify-content-between mb-3"><h4 class="text-secondary">Berita & Kegiatan</h4><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddBerita"><i class="fas fa-plus"></i> Tambah Berita</button></div><div class="table-responsive"><table class="table table-striped"><thead class="table-dark"><tr><th>Tanggal</th><th>Judul</th><th>Kategori</th><th>Foto Tersimpan</th></tr></thead><tbody id="table-berita-body"></tbody></table></div></div>
+                <div id="page-video" class="page-section"><div class="d-flex justify-content-between mb-3"><h4 class="text-secondary">Galeri Video</h4><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddVideo"><i class="fas fa-plus"></i></button></div><div class="table-responsive"><table class="table table-striped"><thead class="table-dark"><tr><th>Tanggal</th><th>Judul Video</th><th>Link YouTube</th></tr></thead><tbody id="table-video-body"></tbody></table></div></div>
+                <div id="page-agenda" class="page-section"><div class="d-flex justify-content-between mb-3"><h4 class="text-secondary">Agenda Kegiatan</h4><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddAgenda"><i class="fas fa-plus"></i></button></div><div class="table-responsive"><table class="table table-striped"><thead class="table-dark"><tr><th>Tgl Kegiatan</th><th>Nama Kegiatan</th><th>Tempat</th><th>Keterangan</th></tr></thead><tbody id="table-agenda-body"></tbody></table></div></div>
+                <div id="page-dokumen" class="page-section"><div class="d-flex justify-content-between mb-3"><h4 class="text-secondary">Pusat Dokumen</h4><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddDokumen"><i class="fas fa-plus"></i></button></div><div class="table-responsive"><table class="table table-striped"><thead class="table-dark"><tr><th>Tanggal</th><th>Kategori</th><th>Nama Dokumen</th><th>Aksi</th></tr></thead><tbody id="table-dokumen-body"></tbody></table></div></div>
+                <div id="page-header-web" class="page-section"><div class="d-flex justify-content-between mb-3"><h4 class="text-secondary">Header Slide Web</h4><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddHeader"><i class="fas fa-plus"></i> Tambah Header</button></div><div class="alert alert-info py-2"><i class="fas fa-info-circle"></i> Unggah gambar yang akan ditampilkan bergeser di halaman utama. Gambar akan otomatis tersimpan ke Google Drive Anda.</div><div class="table-responsive"><table class="table table-striped"><thead class="table-dark"><tr><th>Tanggal Upload</th><th>Teks Banner</th><th>Link Gambar</th></tr></thead><tbody id="table-header-body"></tbody></table></div></div>
+                <div id="page-pengaturan" class="page-section"><h4 class="text-secondary mb-3">Pengaturan Website</h4><div class="row"><div class="col-md-6"><div class="card"><div class="card-header bg-success text-white fw-bold"><i class="fab fa-whatsapp"></i> Kontak WhatsApp Floating</div><div class="card-body"><form id="formUpdateWA"><label class="form-label">Nomor WhatsApp (Gunakan awalan 62)</label><input type="number" id="inputNoWA" class="form-control mb-3" placeholder="Contoh: 628123456789" required><button type="submit" class="btn btn-success" id="btnSimpanWA">Simpan Nomor WA</button></form></div></div></div></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SEMUA MODALS / POP UP FORM (ADMIN ONLY) -->
+<!-- ========================================== -->
+<div class="modal fade" id="modalAddSekolah" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form id="formAddSekolah"><div class="modal-header bg-primary text-white"><h5 class="modal-title">Sekolah</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="number" id="inputNPSN" class="form-control mb-2" placeholder="NPSN" required><input type="text" id="inputNamaSekolah" class="form-control mb-2" placeholder="Nama Sekolah" required><input type="text" id="inputKepsek" class="form-control mb-2" placeholder="Kepala Sekolah" required><div class="row"><div class="col-6"><input type="number" id="inputJmlGuru" class="form-control mb-2" placeholder="Jml Guru" required></div><div class="col-6"><input type="number" id="inputJmlSiswa" class="form-control mb-2" placeholder="Jml Siswa" required></div></div><select id="inputAkreditasi" class="form-select" required><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="Belum">Belum</option></select></div><div class="modal-footer"><button type="submit" class="btn btn-primary" id="btnSimpanSekolah">Simpan</button></div></form></div></div></div>
+<div class="modal fade" id="modalAddSupervisi" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><form id="formAddSupervisi"><div class="modal-header bg-success text-white"><h5 class="modal-title">Supervisi</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="row"><div class="col-6"><input type="date" id="spvTanggal" class="form-control mb-2" required></div><div class="col-6"><select id="spvSekolah" class="form-select select-sekolah mb-2" required></select></div></div><select id="spvJenis" class="form-select mb-2" required><option value="Akademik">Akademik</option><option value="Manajerial">Manajerial</option><option value="Administrasi">Administrasi</option></select><textarea id="spvHasil" class="form-control mb-2" placeholder="Hasil" required></textarea><textarea id="spvTindakLanjut" class="form-control" placeholder="Tindak Lanjut" required></textarea></div><div class="modal-footer"><button type="submit" class="btn btn-success" id="btnSimpanSupervisi">Simpan</button></div></form></div></div></div>
+<div class="modal fade" id="modalAddRapor" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form id="formAddRapor"><div class="modal-header bg-warning"><h5 class="modal-title">Rapor</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><select id="rprSekolah" class="form-select select-sekolah mb-2" required></select><input type="number" id="rprTahun" class="form-control mb-2" placeholder="Tahun" required><input type="number" step="0.01" id="rprLiterasi" class="form-control mb-2" placeholder="Literasi" required><input type="number" step="0.01" id="rprNumerasi" class="form-control mb-2" placeholder="Numerasi" required><input type="number" step="0.01" id="rprKarakter" class="form-control mb-2" placeholder="Karakter" required></div><div class="modal-footer"><button type="submit" class="btn btn-warning" id="btnSimpanRapor">Simpan</button></div></form></div></div></div>
+<div class="modal fade" id="modalAddRKJM" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form id="formAddRKJM"><div class="modal-header bg-info"><h5 class="modal-title">RKJM</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><select id="rjmSekolah" class="form-select select-sekolah mb-2" required></select><input type="text" id="rjmTahun" class="form-control mb-2" placeholder="Periode" required><input type="text" id="rjmProgram" class="form-control mb-2" placeholder="Program" required><textarea id="rjmTujuan" class="form-control mb-2" placeholder="Tujuan" required></textarea><textarea id="rjmTarget" class="form-control" placeholder="Target" required></textarea></div><div class="modal-footer"><button type="submit" class="btn btn-info" id="btnSimpanRKJM">Simpan</button></div></form></div></div></div>
+<div class="modal fade" id="modalAddRKT" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form id="formAddRKT"><div class="modal-header bg-dark text-white"><h5 class="modal-title">RKT</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><select id="rktSekolah" class="form-select select-sekolah mb-2" required></select><input type="number" id="rktTahun" class="form-control mb-2" placeholder="Tahun" required><input type="text" id="rktKegiatan" class="form-control mb-2" placeholder="Kegiatan" required><input type="number" id="rktAnggaran" class="form-control mb-2" placeholder="Anggaran" required></div><div class="modal-footer"><button type="submit" class="btn btn-dark" id="btnSimpanRKT">Simpan</button></div></form></div></div></div>
+<div class="modal fade" id="modalAddARKAS" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form id="formAddARKAS"><div class="modal-header text-white" style="background-color:#605ca8;"><h5 class="modal-title">ARKAS</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><select id="arkSekolah" class="form-select select-sekolah mb-2" required></select><input type="number" id="arkTahun" class="form-control mb-2" placeholder="Tahun" required><select id="arkSumberDana" class="form-select mb-2" required><option value="BOS Reguler">BOS Reguler</option><option value="BOS Daerah">BOS Daerah</option></select><input type="number" id="arkPagu" class="form-control mb-2" placeholder="Pagu" required><input type="number" id="arkRealisasi" class="form-control mb-2" placeholder="Realisasi" required></div><div class="modal-footer"><button type="submit" class="btn text-white" style="background-color:#605ca8;" id="btnSimpanARKAS">Simpan</button></div></form></div></div></div>
+<div class="modal fade" id="modalAddTanya" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form id="formAddTanya"><div class="modal-header bg-primary text-white"><h5 class="modal-title">Tanya GTK</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="tnyNama" class="form-control mb-2" placeholder="Nama Penanya" required><select id="tnySekolah" class="form-select select-sekolah mb-2" required></select><select id="tnyKategori" class="form-select mb-2" required><option value="Kurikulum">Kurikulum</option><option value="Manajemen">Manajemen</option></select><textarea id="tnyPertanyaan" class="form-control" placeholder="Pertanyaan..." rows="3" required></textarea></div><div class="modal-footer"><button type="submit" class="btn btn-primary" id="btnSimpanTanya">Kirim</button></div></form></div></div></div>
+<div class="modal fade" id="modalJawabGTK" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form id="formJawabGTK"><div class="modal-header bg-warning"><h5 class="modal-title">Balas Pertanyaan</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="gtkId"><textarea id="gtkPertanyaan" class="form-control bg-light mb-2" rows="3" readonly></textarea><textarea id="gktJawaban" class="form-control" rows="4" placeholder="Jawaban..." required></textarea></div><div class="modal-footer"><button type="submit" class="btn btn-warning" id="btnSimpanJawabGTK">Kirim</button></div></form></div></div></div>
+<div class="modal fade" id="modalAddVideo" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form id="formAddVideo"><div class="modal-header bg-danger text-white"><h5 class="modal-title">Video YouTube</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="vidJudul" class="form-control mb-2" placeholder="Judul" required><input type="url" id="vidUrl" class="form-control mb-2" placeholder="Link YouTube" required><textarea id="vidKeterangan" class="form-control" placeholder="Keterangan" rows="2" required></textarea></div><div class="modal-footer"><button type="submit" class="btn btn-danger" id="btnSimpanVideo">Simpan</button></div></form></div></div></div>
+<div class="modal fade" id="modalAddAgenda" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form id="formAddAgenda"><div class="modal-header bg-secondary text-white"><h5 class="modal-title">Agenda Baru</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="date" id="agdTanggal" class="form-control mb-2" required><input type="text" id="agdKegiatan" class="form-control mb-2" placeholder="Kegiatan" required><input type="text" id="agdTempat" class="form-control mb-2" placeholder="Tempat" required><textarea id="agdKeterangan" class="form-control" placeholder="Keterangan" rows="2" required></textarea></div><div class="modal-footer"><button type="submit" class="btn btn-secondary" id="btnSimpanAgenda">Simpan</button></div></form></div></div></div>
+<div class="modal fade" id="modalAddDokumen" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form id="formAddDokumen"><div class="modal-header bg-dark text-white"><h5 class="modal-title">Upload Dokumen</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="dokNama" class="form-control mb-2" placeholder="Nama Dokumen" required><select id="dokKategori" class="form-select mb-2" required><option value="Instrumen">Instrumen</option><option value="Laporan">Laporan</option></select><input type="url" id="dokLink" class="form-control mb-2" placeholder="Link GDrive" required></div><div class="modal-footer"><button type="submit" class="btn btn-dark" id="btnSimpanDokumen">Simpan</button></div></form></div></div></div>
+
+<div class="modal fade" id="modalAddBerita" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><form id="formAddBerita"><div class="modal-header bg-primary text-white"><h5 class="modal-title">Berita Baru</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="brtJudul" class="form-control mb-2" placeholder="Judul" required><select id="brtKategori" class="form-select mb-2" required><option value="Kegiatan">Kegiatan</option><option value="Pengumuman">Pengumuman</option></select><textarea id="brtIsi" class="form-control mb-2" placeholder="Isi..." rows="5" required></textarea><label class="form-label text-muted small">Pilih Foto (Disarankan ukuran foto < 2MB)</label><input type="file" id="brtFotoFile" class="form-control mb-2" accept="image/*" multiple><input type="text" id="brtPenulis" class="form-control" placeholder="Penulis" required></div><div class="modal-footer"><button type="submit" class="btn btn-primary" id="btnSimpanBerita">Publikasi</button></div></form></div></div></div>
+<div class="modal fade" id="modalAddHeader" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form id="formAddHeader"><div class="modal-header bg-primary text-white"><h5 class="modal-title">Tambah Header Banner</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="hdrJudul" class="form-control mb-2" placeholder="Teks Banner Besar (Misal: Selamat Datang)"><label class="form-label text-muted small">Pilih Gambar Header</label><input type="file" id="hdrGambarFile" class="form-control mb-2" accept="image/*" required></div><div class="modal-footer"><button type="submit" class="btn btn-primary" id="btnSimpanHeader">Upload & Simpan</button></div></form></div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+    let chartAkre, chartArk; 
+    const getBase64 = (file) => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result); reader.onerror = error => reject(error); });
+
+    function switchView(viewName) {
+        document.getElementById('public-view').style.display = 'none';
+        document.getElementById('login-view').style.display = 'none';
+        document.getElementById('admin-view').style.display = 'none';
+        if (viewName === 'public') { document.getElementById('public-view').style.display = 'block'; loadPublicData(); } 
+        else if (viewName === 'login') { if(localStorage.getItem('simpeka_logged_in') === 'true') switchView('admin'); else document.getElementById('login-view').style.display = 'flex'; } 
+        else if (viewName === 'admin') { 
+            document.getElementById('admin-view').style.display = 'block'; 
+            document.getElementById('userNameDisplay').innerHTML = `<i class="fas fa-user-circle"></i> ${localStorage.getItem('simpeka_user_name')}`;
+            showPage('sekolah'); // Langsung buka halaman Sekolah
+        }
+    }
+    window.onload = () => { switchView('public'); };
+
+    document.getElementById('formLogin').addEventListener('submit', async (e) => {
+        e.preventDefault(); let btn = document.getElementById('btnLogin'); btn.innerHTML = 'Memeriksa...'; btn.disabled = true;
+        try { let res = await fetch(GAS_WEB_APP_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "login", username: document.getElementById('username').value, password: document.getElementById('password').value }) });
+            let data = JSON.parse(await res.text());
+            if(data.status === 'success') { localStorage.setItem('simpeka_logged_in', 'true'); localStorage.setItem('simpeka_user_name', data.nama); switchView('admin'); } else alert(data.message);
+        } catch(e) { alert("Error jaringan."); } finally { btn.innerHTML = 'Masuk'; btn.disabled = false; }
+    });
+    function logout() { localStorage.clear(); switchView('public'); }
+    document.getElementById('sidebarToggle').addEventListener('click', () => { let sb = document.getElementById('sidebar'); sb.style.marginLeft = sb.style.marginLeft === '-250px' ? '0' : '-250px'; });
+    function getYoutubeId(url) { let match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/); return match ? match[1] : null; }
+
+    async function loadPublicData() {
+        if(!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes("MASUKKAN")) return;
+        
+        try { let setnData = await (await fetch(GAS_WEB_APP_URL + "?action=getPengaturan")).json(); let waRow = setnData.find(x => x.Kunci === "No_WA"); if(waRow && waRow.Nilai) { let btnWa = document.getElementById('btnWaFloat'); btnWa.href = `https://wa.me/${waRow.Nilai}`; btnWa.classList.remove('d-none'); } } catch(e){}
+        try { let hdrData = await (await fetch(GAS_WEB_APP_URL + "?action=getHeader")).json(); if(hdrData.length > 0) { document.getElementById('public-header-container').innerHTML = hdrData.map((h, i) => `<div class="carousel-item ${i===0?'active':''}"><img src="${h.Link_Gambar}" class="d-block w-100" alt="Banner"><div class="carousel-caption"><h1>${h.Judul_Banner || ''}</h1></div></div>`).join(''); } } catch(e){}
+        
+        // Load Box Statistik di Publik
+        try { 
+            let statData = await (await fetch(GAS_WEB_APP_URL + "?action=getStats")).json(); 
+            let stCont = document.getElementById('public-stats-container'); stCont.innerHTML = ''; 
+            let icons = ['fa-school text-primary', 'fa-chalkboard-teacher text-success', 'fa-users text-warning', 'fa-search text-danger']; 
+            statData.slice(0, 4).forEach((item, i) => stCont.innerHTML += `<div class="col-6 col-md-3"><div class="stat-box"><i class="fas ${icons[i % 4]} fs-1"></i><h2>${item.Jumlah}</h2><p>${item.Kategori}</p></div></div>`); 
+        } catch (e) {}
+
+        // Tampilkan Wadah Grafik di Publik
+        document.getElementById('public-charts-container').style.display = 'flex';
+        
+        // Load Grafik Akreditasi di Publik
+        try { 
+            let sekData = await (await fetch(GAS_WEB_APP_URL + "?action=getSekolah")).json(); 
+            let akreHitung = { "A":0, "B":0, "C":0, "Belum":0 }; 
+            sekData.forEach(s => { if(akreHitung[s.Akreditasi] !== undefined) akreHitung[s.Akreditasi]++; }); 
+            if(chartAkre) chartAkre.destroy(); 
+            chartAkre = new Chart(document.getElementById('chartAkreditasi').getContext('2d'), { type: 'doughnut', data: { labels: ['A', 'B', 'C', 'Belum'], datasets: [{ data: [akreHitung.A, akreHitung.B, akreHitung.C, akreHitung.Belum], backgroundColor: ['#00a65a','#f39c12','#00c0ef','#dd4b39']}] }, options: { responsive: true, maintainAspectRatio: false } }); 
+        } catch(e) {}
+        
+        // Load Grafik ARKAS di Publik
+        try { 
+            let arkData = await (await fetch(GAS_WEB_APP_URL + "?action=getARKAS")).json(); 
+            let labelSekolah = [], dataPagu = [], dataReal = []; 
+            arkData.slice(0, 10).forEach(a => { labelSekolah.push(a.Nama_Sekolah.substring(0,10)+".."); dataPagu.push(a.Total_Anggaran); dataReal.push(a.Realisasi); }); 
+            if(chartArk) chartArk.destroy(); 
+            chartArk = new Chart(document.getElementById('chartArkas').getContext('2d'), { type: 'bar', data: { labels: labelSekolah, datasets: [ { label: 'Pagu Anggaran', data: dataPagu, backgroundColor: '#3c8dbc' }, { label: 'Realisasi', data: dataReal, backgroundColor: '#00a65a' } ] }, options: { responsive: true, maintainAspectRatio: false } }); 
+        } catch(e){}
+
+        // Data Publik Lainnya
+        try { let newsData = await (await fetch(GAS_WEB_APP_URL + "?action=getBerita")).json(); let nwCont = document.getElementById('public-news-container'); if(newsData.length) { nwCont.innerHTML = newsData.reverse().map(r => { let fotos = r.Foto ? r.Foto.split(',') : []; let imgHtml = fotos.length > 0 ? `<img src="${fotos[0].trim()}" class="card-img-top" alt="Berita">` : `<div class="bg-secondary text-white text-center py-5"><i class="fas fa-image fs-1"></i></div>`; return `<div class="news-card card h-100 shadow-sm border-0">${imgHtml}<div class="card-body"><span class="badge bg-primary mb-2">${r.Kategori}</span><h6 class="card-title fw-bold">${r.Judul}</h6><div class="small text-muted mb-2"><i class="far fa-calendar-alt"></i> ${new Date(r.Tanggal).toLocaleDateString('id-ID')}</div><p class="card-text text-secondary small" style="display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">${r.Isi}</p></div></div>`; }).join(''); } else { nwCont.innerHTML = '<div class="alert alert-light border text-center w-100">Belum ada berita.</div>'; } } catch (e) {}
+        try { let agdData = await (await fetch(GAS_WEB_APP_URL + "?action=getAgenda")).json(); document.getElementById('public-agenda-container').innerHTML = agdData.length ? agdData.reverse().slice(0, 5).map(r => `<li class="list-group-item"><div class="fw-bold text-primary">${r.Nama_Kegiatan}</div><div class="small text-muted"><i class="far fa-calendar-check"></i> ${new Date(r.Tanggal_Kegiatan).toLocaleDateString('id-ID')} <br><i class="fas fa-map-marker-alt"></i> ${r.Tempat}</div></li>`).join('') : '<li class="list-group-item text-center">Tidak ada agenda.</li>'; } catch (e) {}
+        try { let vidData = await (await fetch(GAS_WEB_APP_URL + "?action=getVideo")).json(); document.getElementById('public-video-container').innerHTML = vidData.length ? vidData.reverse().slice(0, 6).map(r => { let vId = getYoutubeId(r.Link_URL); let iframeHtml = vId ? `<iframe width="100%" height="220" src="https://www.youtube.com/embed/${vId}" frameborder="0" allowfullscreen style="border-radius:5px;"></iframe>` : `<div class="bg-dark text-white text-center p-5">Video Tidak Valid</div>`; return `<div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body p-2">${iframeHtml}<h6 class="card-title fw-bold mt-3">${r.Judul}</h6><p class="card-text small text-muted">${r.Keterangan}</p></div></div></div>`; }).join('') : '<div class="col-12 text-center">Galeri kosong.</div>'; } catch (e) {}
+        try { let dokData = await (await fetch(GAS_WEB_APP_URL + "?action=getDokumen")).json(); document.getElementById('public-dokumen-container').innerHTML = dokData.length ? dokData.reverse().map(r => `<tr><td><span class="badge bg-secondary">${r.Kategori}</span></td><td class="fw-bold">${r.Nama_Dokumen}</td><td class="text-end"><a href="${r.Link_Download}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-download"></i> Unduh</a></td></tr>`).join('') : '<tr><td colspan="3" class="text-center">Belum ada dokumen.</td></tr>'; } catch (e) {}
+    }
+
+    function showPage(pageId, element) {
+        document.querySelectorAll('.page-section, .menu-link').forEach(el => el.classList.remove('active'));
+        document.getElementById('page-' + pageId).classList.add('active'); if(element) element.classList.add('active');
+        if(pageId === 'sekolah') loadDataSekolah(); if(pageId === 'supervisi') loadDataSupervisi(); if(pageId === 'rapor') loadDataRapor(); if(pageId === 'rkjm') loadDataRKJM(); if(pageId === 'rkt') loadDataRKT(); if(pageId === 'arkas') loadDataARKAS(); if(pageId === 'tanya-gtk') loadDataTanyaGTK(); if(pageId === 'berita') loadDataBerita(); if(pageId === 'video') loadDataVideo(); if(pageId === 'agenda') loadDataAgenda(); if(pageId === 'dokumen') loadDataDokumen(); if(pageId === 'header-web') loadDataHeader(); if(pageId === 'pengaturan') loadDataPengaturan();
+    }
+
+    async function populateDropdown(sel) { let dds = document.querySelectorAll(sel); dds.forEach(d => d.innerHTML = '<option value="">Memuat...</option>'); try { let data = await (await fetch(GAS_WEB_APP_URL + "?action=getSekolah")).json(); dds.forEach(d => d.innerHTML = '<option value="">Pilih Sekolah...</option>' + data.map(r => `<option value="${r.NPSN}">${r.Nama_Sekolah}</option>`).join('')); } catch (e) {} }
+
+    async function loadDataSekolah() { let tb = document.getElementById('table-sekolah-body'); tb.innerHTML = '<tr><td colspan="6">Memuat...</td></tr>'; try { let data = await (await fetch(GAS_WEB_APP_URL + "?action=getSekolah")).json(); tb.innerHTML = data.length ? data.map(r => `<tr><td>${r.NPSN}</td><td>${r.Nama_Sekolah}</td><td>${r.Kepala_Sekolah}</td><td>${r.Jumlah_Guru}</td><td>${r.Jumlah_Siswa}</td><td>${r.Akreditasi}</td></tr>`).join('') : '<tr><td colspan="6">Kosong</td></tr>'; } catch (e) {} }
+    async function loadDataSupervisi() { let tb = document.getElementById('table-supervisi-body'); tb.innerHTML = '<tr><td colspan="4">Memuat...</td></tr>'; try { let data = await (await fetch(GAS_WEB_APP_URL + "?action=getSupervisi")).json(); tb.innerHTML = data.length ? data.map(r => `<tr><td>${new Date(r.Tanggal).toLocaleDateString('id')}</td><td>${r.Nama_Sekolah}</td><td>${r.Jenis_Supervisi}</td><td>${r.Hasil}</td></tr>`).join('') : '<tr><td colspan="4">Kosong</td></tr>'; } catch (e) {} }
+    async function loadDataRapor() { let tb = document.getElementById('table-rapor-body'); tb.innerHTML = '<tr><td colspan="5">Memuat...</td></tr>'; try { let data = await (await fetch(GAS_WEB_APP_URL + "?action=getRapor")).json(); tb.innerHTML = data.length ? data.map(r => `<tr><td>${r.Nama_Sekolah}</td><td>${r.Tahun}</td><td>${r.Literasi}</td><td>${r.Numerasi}</td><td>${r.Karakter}</td></tr>`).join('') : '<tr><td colspan="5">Kosong</td></tr>'; } catch (e) {} }
+    async function loadDataRKJM() { let tb = document.getElementById('table-rkjm-body'); tb.innerHTML = '<tr><td colspan="4">Memuat...</td></tr>'; try { let data = await (await fetch(GAS_WEB_APP_URL + "?action=getRKJM")).json(); tb.innerHTML = data.length ? data.map(r => `<tr><td>${r.Nama_Sekolah}</td><td>${r.Tahun_Periode}</td><td>${r.Program}</td><td>${r.Status}</td></tr>`).join('') : '<tr><td colspan="4">Kosong</td></tr>'; } catch (e) {} }
+    async function loadDataRKT() { let tb = document.getElementById('table-rkt-body'); tb.innerHTML = '<tr><td colspan="4">Memuat...</td></tr>'; try { let data = await (await fetch(GAS_WEB_APP_URL + "?action=getRKT")).json(); tb.innerHTML = data.length ? data.map(r => `<tr><td>${r.Nama_Sekolah}</td><td>${r.Tahun}</td><td>${r.Kegiatan}</td><td>${formatRp(r.Anggaran)}</td></tr>`).join('') : '<tr><td colspan="4">Kosong</td></tr>'; } catch (e) {} }
+    async function loadDataARKAS() { let tb = document.getElementById('table-arkas-body'); tb.innerHTML = '<tr><td colspan="6">Memuat...</td></tr>'; try { let data = await (await fetch(GAS_WEB_APP_URL + "?action=getARKAS")).json(); tb.innerHTML = data.length ? data.map(r => `<tr><td>${r.Nama_Sekolah}</td><td>${r.Tahun}</td><td>${r.Sumber_Dana}</td><td>${formatRp(r.Total_Anggaran)}</td><td>${formatRp(r.Realisasi)}</td><td>${r.Persentase}%</td></tr>`).join('') : '<tr><td colspan="6">Kosong</td></tr>'; } catch (e) {} }
+    async function loadDataTanyaGTK() { let tb = document.getElementById('table-tanya-body'); tb.innerHTML = '<tr><td colspan="6">Memuat...</td></tr>'; try { let data = await (await fetch(GAS_WEB_APP_URL + "?action=getTanyaGTK")).json(); tb.innerHTML = data.length ? data.map(r => { let btnJawab = r.Status === 'Sudah Dijawab' ? `<span class="badge bg-success"><i class="fas fa-check"></i></span>` : `<button class="btn btn-sm btn-warning" onclick="bukaModalJawab('${r.ID}', '${r.Pertanyaan}')">Jawab</button>`; return `<tr><td>${new Date(r.Tanggal).toLocaleDateString('id-ID')}</td><td><b>${r.Nama_Penanya}</b><br><small>${r.NPSN}</small></td><td>${r.Kategori}</td><td>${r.Pertanyaan}</td><td>${r.Status}</td><td>${btnJawab}</td></tr>`; }).join('') : '<tr><td colspan="6">Kosong</td></tr>'; } catch (e) {} }
+    async function loadDataBerita() { let tb = document.getElementById('table-berita-body'); tb.innerHTML = '<tr><td colspan="4">Memuat...</td></tr>'; try { let data = await (await fetch(GAS_WEB_APP_URL + "?action=getBerita")).json(); tb.innerHTML = data.length ? data.map(r => `<tr><td>${new Date(r.Tanggal).toLocaleDateString('id-ID')}</td><td>${r.Judul}</td><td>${r.Kategori}</td><td>${r.Foto ? 'Terupload' : '-'}</td></tr>`).join('') : '<tr><td colspan="4">Kosong</td></tr>'; } catch (e) {} }
+    async function loadDataVideo() { let tb = document.getElementById('table-video-body'); tb.innerHTML = '<tr><td colspan="3">Memuat...</td></tr>'; try { let data = await (await fetch(GAS_WEB_APP_URL + "?action=getVideo")).json(); tb.innerHTML = data.length ? data.map(r => `<tr><td>${new Date(r.Tanggal).toLocaleDateString('id-ID')}</td><td>${r.Judul}</td><td><a href="${r.Link_URL}" target="_blank">Lihat</a></td></tr>`).join('') : '<tr><td colspan="3">Kosong</td></tr>'; } catch (e) {} }
+    async function loadDataAgenda() { let tb = document.getElementById('table-agenda-body'); tb.innerHTML = '<tr><td colspan="4">Memuat...</td></tr>'; try { let data = await (await fetch(GAS_WEB_APP_URL + "?action=getAgenda")).json(); tb.innerHTML = data.length ? data.map(r => `<tr><td>${new Date(r.Tanggal_Kegiatan).toLocaleDateString('id-ID')}</td><td class="fw-bold">${r.Nama_Kegiatan}</td><td>${r.Tempat}</td><td>${r.Keterangan}</td></tr>`).join('') : '<tr><td colspan="4">Kosong</td></tr>'; } catch (e) {} }
+    async function loadDataDokumen() { let tb = document.getElementById('table-dokumen-body'); tb.innerHTML = '<tr><td colspan="4">Memuat...</td></tr>'; try { let data = await (await fetch(GAS_WEB_APP_URL + "?action=getDokumen")).json(); tb.innerHTML = data.length ? data.map(r => `<tr><td>${new Date(r.Tanggal_Input).toLocaleDateString('id-ID')}</td><td><span class="badge bg-secondary">${r.Kategori}</span></td><td class="fw-bold">${r.Nama_Dokumen}</td><td><a href="${r.Link_Download}" target="_blank" class="btn btn-sm btn-outline-dark"><i class="fas fa-download"></i> Buka</a></td></tr>`).join('') : '<tr><td colspan="4">Kosong</td></tr>'; } catch (e) {} }
+    async function loadDataHeader() { let tb = document.getElementById('table-header-body'); tb.innerHTML = '<tr><td colspan="3">Memuat...</td></tr>'; try { let data = await (await fetch(GAS_WEB_APP_URL + "?action=getHeader")).json(); tb.innerHTML = data.length ? data.map(r => `<tr><td>${new Date(r.Tanggal).toLocaleDateString('id-ID')}</td><td>${r.Judul_Banner}</td><td><a href="${r.Link_Gambar}" target="_blank">Lihat Gambar</a></td></tr>`).join('') : '<tr><td colspan="3">Kosong</td></tr>'; } catch (e) {} }
+    async function loadDataPengaturan() { try { let data = await (await fetch(GAS_WEB_APP_URL + "?action=getPengaturan")).json(); let waRow = data.find(x => x.Kunci === "No_WA"); if(waRow) document.getElementById('inputNoWA').value = waRow.Nilai; } catch(e){} }
+
+    async function postData(action, payload, btnId, btnText, modalId, callback) { 
+        let btn = document.getElementById(btnId); btn.innerHTML = 'Menyimpan...'; btn.disabled = true; 
+        try { let res = await fetch(GAS_WEB_APP_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: action, ...payload }) }); let data = JSON.parse(await res.text()); if(data.status === 'success') { alert("Berhasil!"); if(modalId) bootstrap.Modal.getInstance(document.getElementById(modalId)).hide(); callback(); } else alert("Gagal: " + data.message); } 
+        catch(e) { alert("Error sistem."); } finally { btn.innerHTML = btnText; btn.disabled = false; } 
+    }
+
+    document.getElementById('formAddSekolah').addEventListener('submit', (e) => { e.preventDefault(); postData("addSekolah", { npsn: document.getElementById('inputNPSN').value, nama_sekolah: document.getElementById('inputNamaSekolah').value, kepala_sekolah: document.getElementById('inputKepsek').value, jml_guru: document.getElementById('inputJmlGuru').value, jml_siswa: document.getElementById('inputJmlSiswa').value, akreditasi: document.getElementById('inputAkreditasi').value }, 'btnSimpanSekolah', 'Simpan', 'modalAddSekolah', () => { document.getElementById('formAddSekolah').reset(); loadDataSekolah(); });});
+    document.getElementById('formAddSupervisi').addEventListener('submit', (e) => { e.preventDefault(); let s = document.getElementById('spvSekolah'); postData("addSupervisi", { tanggal: document.getElementById('spvTanggal').value, npsn: s.value, sekolah: s.options[s.selectedIndex].text, jenis: document.getElementById('spvJenis').value, hasil: document.getElementById('spvHasil').value, tindak_lanjut: document.getElementById('spvTindakLanjut').value }, 'btnSimpanSupervisi', 'Simpan', 'modalAddSupervisi', () => { document.getElementById('formAddSupervisi').reset(); loadDataSupervisi(); });});
+    document.getElementById('formAddRapor').addEventListener('submit', (e) => { e.preventDefault(); let s = document.getElementById('rprSekolah'); postData("addRapor", { npsn: s.value, sekolah: s.options[s.selectedIndex].text, tahun: document.getElementById('rprTahun').value, literasi: document.getElementById('rprLiterasi').value, numerasi: document.getElementById('rprNumerasi').value, karakter: document.getElementById('rprKarakter').value }, 'btnSimpanRapor', 'Simpan', 'modalAddRapor', () => { document.getElementById('formAddRapor').reset(); loadDataRapor(); });});
+    document.getElementById('formAddRKJM').addEventListener('submit', (e) => { e.preventDefault(); let s = document.getElementById('rjmSekolah'); postData("addRKJM", { npsn: s.value, sekolah: s.options[s.selectedIndex].text, tahun_periode: document.getElementById('rjmTahun').value, program: document.getElementById('rjmProgram').value, tujuan: document.getElementById('rjmTujuan').value, target: document.getElementById('rjmTarget').value }, 'btnSimpanRKJM', 'Simpan', 'modalAddRKJM', () => { document.getElementById('formAddRKJM').reset(); loadDataRKJM(); });});
+    document.getElementById('formAddRKT').addEventListener('submit', (e) => { e.preventDefault(); let s = document.getElementById('rktSekolah'); postData("addRKT", { npsn: s.value, sekolah: s.options[s.selectedIndex].text, tahun: document.getElementById('rktTahun').value, kegiatan: document.getElementById('rktKegiatan').value, anggaran: document.getElementById('rktAnggaran').value }, 'btnSimpanRKT', 'Simpan', 'modalAddRKT', () => { document.getElementById('formAddRKT').reset(); loadDataRKT(); });});
+    document.getElementById('formAddARKAS').addEventListener('submit', (e) => { e.preventDefault(); let s = document.getElementById('arkSekolah'); postData("addARKAS", { npsn: s.value, sekolah: s.options[s.selectedIndex].text, tahun: document.getElementById('arkTahun').value, sumber_dana: document.getElementById('arkSumberDana').value, total_anggaran: document.getElementById('arkPagu').value, realisasi: document.getElementById('arkRealisasi').value }, 'btnSimpanARKAS', 'Simpan', 'modalAddARKAS', () => { document.getElementById('formAddARKAS').reset(); loadDataARKAS(); });});
+    document.getElementById('formAddTanya').addEventListener('submit', (e) => { e.preventDefault(); let s = document.getElementById('tnySekolah'); postData("addTanya", { nama: document.getElementById('tnyNama').value, npsn: s.value, kategori: document.getElementById('tnyKategori').value, pertanyaan: document.getElementById('tnyPertanyaan').value }, 'btnSimpanTanya', 'Kirim', 'modalAddTanya', () => { document.getElementById('formAddTanya').reset(); loadDataTanyaGTK(); }); });
+    function bukaModalJawab(id, pertanyaan) { document.getElementById('gtkId').value = id; document.getElementById('gtkPertanyaan').value = pertanyaan; new bootstrap.Modal(document.getElementById('modalJawabGTK')).show(); }
+    document.getElementById('formJawabGTK').addEventListener('submit', (e) => { e.preventDefault(); postData("jawabGTK", { id: document.getElementById('gtkId').value, jawaban: document.getElementById('gktJawaban').value }, 'btnSimpanJawabGTK', 'Kirim', 'modalJawabGTK', () => { document.getElementById('formJawabGTK').reset(); loadDataTanyaGTK(); }); });
+    document.getElementById('formAddVideo').addEventListener('submit', (e) => { e.preventDefault(); postData("addVideo", { judul: document.getElementById('vidJudul').value, url: document.getElementById('vidUrl').value, keterangan: document.getElementById('vidKeterangan').value }, 'btnSimpanVideo', 'Simpan', 'modalAddVideo', () => { document.getElementById('formAddVideo').reset(); loadDataVideo(); }); });
+    document.getElementById('formAddAgenda').addEventListener('submit', (e) => { e.preventDefault(); postData("addAgenda", { tanggal: document.getElementById('agdTanggal').value, kegiatan: document.getElementById('agdKegiatan').value, tempat: document.getElementById('agdTempat').value, keterangan: document.getElementById('agdKeterangan').value }, 'btnSimpanAgenda', 'Simpan', 'modalAddAgenda', () => { document.getElementById('formAddAgenda').reset(); loadDataAgenda(); }); });
+    document.getElementById('formAddDokumen').addEventListener('submit', (e) => { e.preventDefault(); postData("addDokumen", { nama: document.getElementById('dokNama').value, kategori: document.getElementById('dokKategori').value, link: document.getElementById('dokLink').value }, 'btnSimpanDokumen', 'Simpan', 'modalAddDokumen', () => { document.getElementById('formAddDokumen').reset(); loadDataDokumen(); }); });
+    document.getElementById('formUpdateWA').addEventListener('submit', (e) => { e.preventDefault(); postData("updateWA", { no_wa: document.getElementById('inputNoWA').value }, 'btnSimpanWA', 'Simpan Nomor WA', null, () => { alert("WA Disimpan. Silakan Refresh Web Publik."); }); });
+
+    document.getElementById('formAddBerita').addEventListener('submit', async (e) => { 
+        e.preventDefault(); let btn = document.getElementById('btnSimpanBerita'); btn.innerHTML = 'Mengunggah...'; btn.disabled = true;
+        try { let fileInput = document.getElementById('brtFotoFile'); let base64Array = []; for (let i = 0; i < fileInput.files.length; i++) { base64Array.push(await getBase64(fileInput.files[i])); } postData("addBerita", { judul: document.getElementById('brtJudul').value, kategori: document.getElementById('brtKategori').value, isi: document.getElementById('brtIsi').value, fotos: base64Array, penulis: document.getElementById('brtPenulis').value }, 'btnSimpanBerita', 'Publikasi', 'modalAddBerita', () => { document.getElementById('formAddBerita').reset(); loadDataBerita(); }); } catch(err) { alert("Gagal membaca gambar."); btn.innerHTML = 'Publikasi'; btn.disabled = false; }
+    });
+
+    document.getElementById('formAddHeader').addEventListener('submit', async (e) => { 
+        e.preventDefault(); let btn = document.getElementById('btnSimpanHeader'); btn.innerHTML = 'Mengunggah...'; btn.disabled = true;
+        try { let fileInput = document.getElementById('hdrGambarFile'); let base64 = ""; if(fileInput.files.length > 0) base64 = await getBase64(fileInput.files[0]); postData("addHeader", { judul: document.getElementById('hdrJudul').value, gambar: base64 }, 'btnSimpanHeader', 'Upload & Simpan', 'modalAddHeader', () => { document.getElementById('formAddHeader').reset(); loadDataHeader(); }); } catch(err) { alert("Gagal membaca gambar."); btn.innerHTML = 'Upload & Simpan'; btn.disabled = false; }
+    });
+</script>
+</body>
+</html>
